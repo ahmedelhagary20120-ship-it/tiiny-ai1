@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tiiny AI | عالم الأسئلة الذكي ✨</title>
+    <style>
+        :root {
+            --main-purple: #6c5ce7;
+            --accent-orange: #ff7675;
+            --fresh-green: #00b894;
+            --soft-white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --code-bg: #2d3436;
+            --border-radius: 20px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                        url('https://i.postimg.cc/nzjsjKgb/Boomerangs.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0; padding: 0; color: #2d3436;
+            min-height: 100vh;
+            /* منع التمرير الأفقي العرضي في الهواتف */
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 15px; background: var(--glass-bg);
+            backdrop-filter: blur(15px); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo-area img { width: 35px; height: 35px; object-fit: contain; }
+        .logo-area span { font-size: 18px; font-weight: 800; background: linear-gradient(45deg, var(--main-purple), var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .btn-style { padding: 8px 15px; border-radius: 25px; border: none; cursor: pointer; font-weight: bold; font-size: 13px; transition: 0.3s; }
+        .login-btn { background: var(--main-purple); color: white; }
+        .logout-btn { background: var(--accent-orange); color: white; display: none; }
+        .admin-btn { background: #2d3436; color: white; display: none; margin-left: 5px; }
+
+        .hero { text-align: center; padding: 40px 15px 10px; }
+        .hero h1 { font-size: 2.2rem; margin-bottom: 5px; }
+        .hero p { color: #636e72; font-size: 1rem; margin-top: 0; }
+
+        .search-wrapper { max-width: 100%; margin: 25px auto; display: flex; gap: 10px; padding: 0 10px; box-sizing: border-box; }
+        .main-input { flex: 1; padding: 15px 20px; border-radius: 50px; border: 2px solid transparent; box-shadow: 0 8px 25px rgba(0,0,0,0.08); font-size: 16px; outline: none; transition: 0.4s; background: white; width: 100%; box-sizing: border-box; }
+        .main-input:focus { border-color: var(--main-purple); }
+
+        .send-btn { background: var(--main-purple); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); }
+
+        #result-area { max-width: 100%; margin: 10px auto 40px; padding: 0 15px; display: none; }
+        .chat-bubble { background: var(--glass-bg); padding: 20px; border-radius: var(--border-radius); border-right: 6px solid var(--main-purple); backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); animation: slideUp 0.5s ease-out; line-height: 1.6; word-wrap: break-word; }
+
+        #custom-toast {
+            visibility: hidden; min-width: 200px; background-color: var(--main-purple); color: #fff;
+            text-align: center; border-radius: 50px; padding: 12px 20px; position: fixed;
+            z-index: 2000; left: 50%; bottom: 20px; transform: translateX(-50%);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2); font-weight: bold; font-size: 14px;
+        }
+        #custom-toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        pre { background: var(--code-bg); color: #fab1a0; padding: 15px; border-radius: 12px; overflow-x: auto; direction: ltr; text-align: left; font-size: 13px; margin: 15px 0; border-left: 4px solid var(--accent-orange); }
+        
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 25px; width: 85%; max-width: 400px; text-align: center; max-height: 85vh; overflow-y: auto; position: relative; }
+        .modal-content input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #eee; background: #f9f9f9; box-sizing: border-box; outline: none; font-size: 16px; }
+
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--main-purple); border-radius: 50%; width: 25px; height: 25px; animation: spin 1s linear infinite; display: block; margin: 10px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        th, td { border: 1px solid #eee; padding: 8px; text-align: center; }
+        th { background-color: var(--main-purple); color: white; }
+
+        /* تعديلات خاصة للهواتف لضمان عدم وجود مساحات فارغة */
+        @media screen and (max-width: 480px) {
+            .hero h1 { font-size: 1.8rem; }
+            .hero p { font-size: 0.9rem; }
+            .main-input { padding: 12px 18px; font-size: 15px; }
+            .chat-bubble { font-size: 14px; }
+            .admin-btn { font-size: 11px; padding: 8px 12px; }
+            .logo-area span { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="https://i.postimg.cc/DyY64hCF/Boomerangs-removebg-preview.png" alt="Tiiny AI Logo">
+            <span>Tiiny AI</span>
+        </div>
+        <div class="user-controls" style="display: flex; align-items: center;">
+            <button id="admin-nav-btn" class="btn-style admin-btn" onclick="openAdminModal()">الأدمن 🛠️</button>
+            <button id="login-nav-btn" class="btn-style login-btn" onclick="openModal()">دخول</button>
+            <button id="logout-nav-btn" class="btn-style logout-btn" onclick="logout()">خروج</button>
+        </div>
+    </header>
+
+    <div id="custom-toast"></div>
+
+    <section class="hero">
+        <span id="display-name" style="font-weight: bold; color: var(--main-purple); display: none; margin-bottom: 10px; font-size: 14px;"></span>
+        <h1>Tiiny<span style="color: var(--main-purple);">.AI</span> ✨</h1>
+        <p>Tiiny هنا لمساعدتك دائما🤖</p>
+        
+        <div class="search-wrapper">
+            <input type="text" id="userInput" class="main-input" placeholder="اسأل أي سؤال...🚀" inputmode="search">
+            <button class="send-btn" onclick="askTiiny()">➔</button>
+        </div>
+    </section>
+
+    <div id="result-area">
+        <div class="chat-bubble">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <img src="https://i.postimg.cc/DyY64hCF/Boomerangs-removebg-preview.png" style="width: 25px; height: 25px; object-fit: contain;">
+                <strong style="color: var(--main-purple); font-size: 1rem;">الإجابة هي:</strong>
+            </div>
+            <div id="answer-content">
+                <div id="answer-text"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-title" style="margin-top: 0; color: var(--main-purple);">مرحباً بك 👋</h3>
+            <div id="register-fields" style="display: none;">
+                <input type="text" id="reg-name" placeholder="الاسم الكامل">
+            </div>
+            <input type="email" id="auth-email" placeholder="البريد الإلكتروني">
+            <input type="password" id="auth-pass" placeholder="كلمة المرور">
+            <button id="main-auth-btn" class="btn-style login-btn" style="width: 100%; margin-top: 10px; padding: 12px;" onclick="handleAuthAction()">دخول</button>
+            <p style="margin-top: 15px; font-size: 0.85em;">
+                <span id="toggle-text">ليس لديك حساب؟</span> 
+                <span class="toggle-link" style="color: var(--main-purple); cursor: pointer; text-decoration: underline; font-weight: bold;" onclick="toggleAuthMode()">إنشاء حساب</span>
+            </p>
+            <button onclick="closeModal()" style="background:none; border:none; color:#b2bec3; cursor:pointer; font-size: 12px;">إغلاق</button>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="width: 92%; max-width: 500px;">
+            <h3 style="margin-top:0">لوحة تحكم المدير 🛠️</h3>
+            <div style="text-align: right; overflow-x: auto;">
+                <h4 style="font-size:14px">👥 الحسابات</h4>
+                <div id="users-list"></div>
+                <hr style="border:0.5px solid #eee">
+                <h4 style="font-size:14px">🔍 سجل البحث</h4>
+                <div id="search-history-list"></div>
+            </div>
+            <br>
+            <button onclick="closeAdminModal()" class="btn-style login-btn" style="width: 100%;">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        let isLoginMode = true;
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+        window.onload = function() {
+            if(currentUser) loginSuccess(currentUser.name, currentUser.email);
+        };
+
+        function showToast(msg) {
+            const toast = document.getElementById("custom-toast");
+            toast.innerText = msg;
+            toast.className = "show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function openModal() { document.getElementById('authModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('authModal').style.display = 'none'; }
+        
+        function openAdminModal() {
+            renderAdminData();
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('modal-title').innerText = isLoginMode ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
+            document.getElementById('register-fields').style.display = isLoginMode ? 'none' : 'block';
+            document.getElementById('main-auth-btn').innerText = isLoginMode ? 'دخول' : 'تسجيل حساب';
+            document.getElementById('toggle-text').innerText = isLoginMode ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟';
+        }
+
+        function handleAuthAction() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if (!email || !pass) { showToast("لطفاً، أكمل البيانات ✍️"); return; }
+            
+            if (isLoginMode) {
+                const savedUser = JSON.parse(localStorage.getItem('user_' + email));
+                if (savedUser && savedUser.password === pass) { 
+                    currentUser = savedUser;
+                    localStorage.setItem('currentUser', JSON.stringify(savedUser));
+                    loginSuccess(savedUser.name, savedUser.email); 
+                } 
+                else { showToast("عذراً، البيانات غير صحيحة ❌"); }
+            } else {
+                const name = document.getElementById('reg-name').value;
+                if (!name) { showToast("يرجى كتابة اسمك 📛"); return; }
+                const newUser = { name: name, email: email, password: pass };
+                localStorage.setItem('user_' + email, JSON.stringify(newUser));
+                
+                let allUsers = JSON.parse(localStorage.getItem('all_users_list')) || [];
+                allUsers.push({name, email});
+                localStorage.setItem('all_users_list', JSON.stringify(allUsers));
+
+                showToast("تم إنشاء حسابك بنجاح! 🎉");
+                setTimeout(toggleAuthMode, 1000);
+            }
+        }
+
+        function loginSuccess(name, email) {
+            document.getElementById('display-name').innerText = "أهلاً، " + name + " 👋";
+            document.getElementById('display-name').style.display = "block";
+            document.getElementById('login-nav-btn').style.display = "none";
+            document.getElementById('logout-nav-btn').style.display = "block";
+            
+            if(email === "Ahmedmostafa@gmail.com") {
+                document.getElementById('admin-nav-btn').style.display = "inline-block";
+            }
+            closeModal();
+        }
+
+        function logout() { 
+            localStorage.removeItem('currentUser');
+            location.reload(); 
+        }
+
+        function renderAdminData() {
+            let users = JSON.parse(localStorage.getItem('all_users_list')) || [];
+            let usersHTML = "<table><tr><th>الاسم</th><th>الإيميل</th></tr>";
+            users.forEach(u => { usersHTML += `<tr><td>${u.name}</td><td>${u.email}</td></tr>`; });
+            usersHTML += "</table>";
+            document.getElementById('users-list').innerHTML = usersHTML;
+
+            let history = JSON.parse(localStorage.getItem('global_search_history')) || [];
+            let historyHTML = "<table><tr><th>المستخدم</th><th>البحث</th></tr>";
+            history.reverse().slice(0, 20).forEach(h => { historyHTML += `<tr><td>${h.user}</td><td>${h.query}</td></tr>`; });
+            historyHTML += "</table>";
+            document.getElementById('search-history-list').innerHTML = historyHTML;
+        }
+
+        function typeWriter(element, text, speed = 10) {
+            let i = 0;
+            element.innerHTML = "";
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        async function askTiiny() {
+            const inputField = document.getElementById('userInput');
+            const input = inputField.value.trim();
+            const answerText = document.getElementById('answer-text');
+            const resultArea = document.getElementById('result-area');
+
+            if (input.length < 2) return;
+
+            let searchHistory = JSON.parse(localStorage.getItem('global_search_history')) || [];
+            searchHistory.push({
+                user: currentUser ? currentUser.name : "زائر",
+                query: input,
+                time: new Date().toLocaleString('ar-EG')
+            });
+            localStorage.setItem('global_search_history', JSON.stringify(searchHistory));
+
+            inputField.value = "";
+            inputField.blur(); // إغلاق لوحة المفاتيح في الهاتف
+            resultArea.style.display = "block";
+            answerText.innerHTML = `<div class="loader"></div> <p style="text-align:center; font-size:14px">يتم البحث الان عبر Tiiny ⚡</p>`;
+            window.scrollTo({ top: resultArea.offsetTop - 80, behavior: 'smooth' });
+
+            try {
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://api.duckduckgo.com/?q=' + encodeURIComponent(input) + '&format=json&no_html=1')}`);
+                const data = await response.json();
+                const result = JSON.parse(data.contents);
+
+                let finalText = "";
+
+                if (result.AbstractText) {
+                    finalText = result.AbstractText;
+                    answerText.innerHTML = `<p style="font-size:15px; margin-bottom:10px;"><strong>${input}:</strong></p><hr style="opacity:0.1"><div id="typing-box"></div><br><p style="font-size:0.7em; color:#999">المصدر: ${result.AbstractSource || 'بحث ويب'}</p>`;
+                    typeWriter(document.getElementById('typing-box'), finalText);
+                } else if (result.RelatedTopics && result.RelatedTopics.length > 0) {
+                    let list = `إليك ما وجدته حول "${input}":\n`;
+                    result.RelatedTopics.slice(0, 5).forEach(topic => {
+                        if (topic.text) list += `🔹 ${topic.text}\n`;
+                    });
+                    answerText.innerHTML = `<hr style="opacity:0.1"><div id="typing-box" style="white-space: pre-line;"></div>`;
+                    typeWriter(document.getElementById('typing-box'), list);
+                } else {
+                    answerText.innerHTML = "⚠️ عذراً، لم أجد إجابة دقيقة حالياً. حاول صياغة السؤال بشكل مختلف.";
+                }
+            } catch (error) {
+                answerText.innerHTML = "❌ حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.";
+            }
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', (e) => { 
+            if (e.key === 'Enter') askTiiny();
+        });
+    </script>
+</body>
+</html>
